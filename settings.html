@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Settings — CampusLink</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  html,body{overflow-x:hidden;width:100%}
+  .settings-body{
+    max-width:780px;margin:96px auto 60px;
+    padding:0 clamp(12px,3vw,28px);box-sizing:border-box;width:100%}
+  .settings-title{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--text);margin-bottom:28px}
+  .settings-section{margin-bottom:22px;padding:24px}
+  .settings-section h2{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);
+    margin-bottom:18px;padding-bottom:10px;border-bottom:1.5px solid var(--border);
+    display:flex;align-items:center;gap:8px}
+  .form-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  /* Avatar upload */
+  .avatar-zone{display:flex;align-items:center;gap:20px;margin-bottom:22px;
+    padding:18px;background:var(--bg2);border-radius:14px;border:1.5px dashed var(--border);
+    flex-wrap:wrap}
+  .upload-circle{width:80px;height:80px;border-radius:50%;background:var(--grad);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;
+    cursor:pointer;overflow:hidden;box-shadow:0 6px 18px var(--glow);
+    flex-shrink:0;position:relative;transition:all .2s;border:3px solid var(--card)}
+  .upload-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+  .upload-circle:hover{transform:scale(1.06);box-shadow:0 10px 28px var(--glow)}
+  .upload-circle:hover::after{content:'📷 Change';position:absolute;inset:0;
+    background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;
+    font-size:.7rem;font-weight:700;border-radius:50%;color:#fff}
+  #avatarFileInput{display:none}
+  .avatar-info h4{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--text)}
+  .avatar-info p{font-size:.78rem;color:var(--muted);margin-top:3px}
+  #uploadProgress{font-size:.78rem;color:var(--primary);margin-top:6px;font-weight:600}
+
+  /* Save message */
+  .save-msg{display:none;margin-bottom:14px;padding:11px 16px;border-radius:10px;
+    font-size:.85rem;font-weight:600;border:1.5px solid transparent}
+  .save-msg.success{background:#D1FAE5;color:#065F46;border-color:#6EE7B7}
+  .save-msg.error{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5}
+
+  /* Danger zone */
+  .danger-btn{padding:10px 20px;border-radius:10px;border:1.5px solid #EF4444;
+    background:transparent;color:#EF4444;font-family:'Syne',sans-serif;
+    font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+  .danger-btn:hover{background:#EF4444;color:#fff}
+
+  @media(max-width:768px){
+    .settings-body{margin-top:76px;padding:0 12px}
+    .settings-title{font-size:1.3rem}
+    .settings-section{padding:16px}
+    .avatar-zone{gap:14px;padding:14px}
+    .form-row2{grid-template-columns:1fr}
+    .btn-submit{max-width:100% !important}
+  }
+  @media(max-width:600px){
+    .form-row2{grid-template-columns:1fr}
+    .settings-title{font-size:1.3rem}
+  }
+  @media(max-width:420px){
+    .settings-body{padding:0 10px}
+    .settings-section{padding:14px}
+    .upload-circle{width:64px;height:64px;font-size:1.2rem}
+  }
+</style>
+</head>
+<body class="loading">
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" role="status" aria-label="Loading Settings">
+  <div class="spinner"></div>
+  <h2>CampusLink</h2>
+</div>
+
+<div id="contentReady" class="content-ready">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">🌿 CampusLink</a>
+  <div class="nav-right">
+    <button class="icon-btn" onclick="history.back()">← Back</button>
+    <button class="theme-btn" onclick="openThemeInline()">🎨 <span id="themeName">Emerald</span></button>
+    <div class="nav-avatar" id="navAvatar"></div>
+  </div>
+</nav>
+
+<!-- Theme modal (reused from main) -->
+<div class="overlay" id="themeOverlay" onclick="if(event.target.id==='themeOverlay')closeThemeInline()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🎨 Choose Your Theme</h3>
+      <button class="close-btn" onclick="closeThemeInline()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="theme-grid">
+        <div class="th-card" onclick="applyThemeSettings('emerald',this)"><div class="th-preview" style="background:linear-gradient(135deg,#22C55E,#10B981)"></div><span>Emerald</span></div>
+        <div class="th-card" onclick="applyThemeSettings('ocean',this)"><div class="th-preview" style="background:linear-gradient(135deg,#3B82F6,#06B6D4)"></div><span>Ocean</span></div>
+        <div class="th-card" onclick="applyThemeSettings('violet',this)"><div class="th-preview" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)"></div><span>Violet</span></div>
+        <div class="th-card" onclick="applyThemeSettings('midnight',this)"><div class="th-preview" style="background:linear-gradient(135deg,#38BDF8,#818CF8)"></div><span>Midnight</span></div>
+        <div class="th-card" onclick="applyThemeSettings('rose',this)"><div class="th-preview" style="background:linear-gradient(135deg,#F43F5E,#FB923C)"></div><span>Rose</span></div>
+        <div class="th-card" onclick="applyThemeSettings('solar',this)"><div class="th-preview" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"></div><span>Solar</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="settings-body">
+  <h1 class="settings-title">⚙️ Settings</h1>
+
+  <!-- ── Profile Card ── -->
+  <div class="card settings-section">
+    <h2>👤 Profile</h2>
+
+    <!-- Status message -->
+    <div class="save-msg" id="saveMsg"></div>
+
+    <!-- Avatar Upload -->
+    <div class="avatar-zone">
+      <div class="upload-circle" id="avatarCircle" onclick="document.getElementById('avatarFileInput').click()"></div>
+      <input type="file" id="avatarFileInput" accept="image/*"/>
+      <div class="avatar-info">
+        <h4>Profile Photo</h4>
+        <p>Click the circle to upload a new photo</p>
+        <div id="uploadProgress"></div>
+      </div>
+    </div>
+
+    <!-- Name & Role -->
+    <div class="form-row2">
+      <div class="form-group">
+        <label for="sDisplayName">Display Name</label>
+        <input id="sDisplayName" class="form-ctrl" type="text" placeholder="Your full name"/>
+      </div>
+      <div class="form-group">
+        <label for="sRole">Role</label>
+        <select id="sRole" class="form-ctrl">
+          <option value="Student">🎓 Student</option>
+          <option value="Faculty">👨‍🏫 Faculty</option>
+          <option value="Researcher">🔬 Researcher</option>
+          <option value="Alumni">🏅 Alumni</option>
+          <option value="Other">👤 Other</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- College & Department -->
+    <div class="form-row2">
+      <div class="form-group">
+        <label for="sCollege">College / University Name</label>
+        <input id="sCollege" class="form-ctrl" type="text" placeholder="e.g. IIT Madras"/>
+      </div>
+      <div class="form-group">
+        <label for="sDepartment">Department</label>
+        <input id="sDepartment" class="form-ctrl" type="text" placeholder="e.g. Computer Science"/>
+      </div>
+    </div>
+
+    <!-- Mobile -->
+    <div class="form-group">
+      <label for="sMobile">Mobile Number</label>
+      <input id="sMobile" class="form-ctrl" type="tel" placeholder="+91 99999 00000" maxlength="15"/>
+    </div>
+
+    <!-- Bio -->
+    <div class="form-group">
+      <label for="sBio">Bio</label>
+      <textarea id="sBio" class="form-ctrl" rows="3" placeholder="Tell the campus about yourself…"></textarea>
+    </div>
+
+    <button class="btn-submit" id="saveProfileBtn" onclick="saveProfile()" style="max-width:200px">Save Changes 💾</button>
+  </div>
+
+  <!-- ── Account ── -->
+  <div class="card settings-section">
+    <h2>🔐 Account</h2>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Signed in as: <strong id="emailDisplay"></strong></p>
+    <button class="danger-btn" onclick="confirmSignOut()">🚪 Sign Out</button>
+  </div>
+
+  <!-- ── Theme ── -->
+  <div class="card settings-section">
+    <h2>🎨 App Theme</h2>
+    <div class="theme-grid">
+      <div class="th-card" onclick="applyThemeSettings('emerald',this)"><div class="th-preview" style="background:linear-gradient(135deg,#22C55E,#10B981)"></div><span>Emerald</span></div>
+      <div class="th-card" onclick="applyThemeSettings('ocean',this)"><div class="th-preview" style="background:linear-gradient(135deg,#3B82F6,#06B6D4)"></div><span>Ocean</span></div>
+      <div class="th-card" onclick="applyThemeSettings('violet',this)"><div class="th-preview" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)"></div><span>Violet</span></div>
+      <div class="th-card" onclick="applyThemeSettings('midnight',this)"><div class="th-preview" style="background:linear-gradient(135deg,#38BDF8,#818CF8)"></div><span>Midnight</span></div>
+      <div class="th-card" onclick="applyThemeSettings('rose',this)"><div class="th-preview" style="background:linear-gradient(135deg,#F43F5E,#FB923C)"></div><span>Rose</span></div>
+      <div class="th-card" onclick="applyThemeSettings('solar',this)"><div class="th-preview" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"></div><span>Solar</span></div>
+    </div>
+  </div>
+
+</div><!-- /settings-body -->
+
+<div id="toastEl" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { auth, db, storage } from './firebase-config.js';
+import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
+
+let currentUser = null;
+let toastTimer  = null;
+
+/* ── Apply saved theme on load ── */
+const savedTheme = localStorage.getItem('cl_theme') || 'emerald';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('themeName').textContent = savedTheme.charAt(0).toUpperCase() + savedTheme.slice(1);
+document.querySelectorAll('.th-card').forEach(c => {
+  if (c.querySelector('span').textContent.toLowerCase() === savedTheme) c.classList.add('active');
+});
+
+/* ── Auth guard & load profile ── */
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  currentUser = user;
+
+  // Show email
+  document.getElementById('emailDisplay').textContent = user.email;
+
+  // Set avatar
+  const initials = (user.displayName || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const circle   = document.getElementById('avatarCircle');
+  const navAv    = document.getElementById('navAvatar');
+
+  if (user.photoURL) {
+    circle.innerHTML = `<img src="${user.photoURL}" alt="${initials}">`;
+    navAv.innerHTML  = `<img src="${user.photoURL}" alt="${initials}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  } else {
+    circle.textContent = initials;
+    navAv.textContent  = initials;
+  }
+
+  // Load Firestore profile
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const d = snap.exists() ? snap.data() : {};
+    document.getElementById('sDisplayName').value = d.displayName || user.displayName || '';
+    document.getElementById('sRole').value        = d.role       || 'Student';
+    document.getElementById('sBio').value         = d.bio        || '';
+    document.getElementById('sCollege').value     = d.college    || '';
+    document.getElementById('sDepartment').value  = d.department || '';
+    document.getElementById('sMobile').value      = d.mobile     || '';
+  } catch(e) {
+    console.warn('Could not load profile:', e);
+  } finally {
+    // Hide loader
+    setTimeout(() => {
+      document.body.classList.remove('loading');
+      document.body.classList.add('loaded');
+    }, 200);
+  }
+});
+
+/* ── Avatar Upload ── */
+document.getElementById('avatarFileInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file || !currentUser) return;
+
+  const prog = document.getElementById('uploadProgress');
+  prog.textContent = '📸 Uploading…';
+
+  try {
+    // Try Firebase Storage
+    const storageRef = ref(storage, `avatars/${currentUser.uid}`);
+    const task       = uploadBytesResumable(storageRef, file);
+    task.on('state_changed',
+      snap => { prog.textContent = `Uploading ${Math.round(snap.bytesTransferred/snap.totalBytes*100)}%…`; },
+      async () => {
+        // CORS fallback — use base64
+        if (file.size < 500 * 1024) {
+          const b64 = await fileToBase64(file);
+          await applyAvatar(b64);
+          prog.textContent = '✅ Photo saved (local)';
+        } else {
+          prog.textContent = '❌ Upload failed (run gsutil cors fix)';
+        }
+      },
+      async () => {
+        const url = await getDownloadURL(task.snapshot.ref);
+        await applyAvatar(url);
+        prog.textContent = '✅ Photo updated!';
+      }
+    );
+  } catch {
+    prog.textContent = '❌ Upload failed';
+  }
+  setTimeout(() => { prog.textContent = ''; }, 3000);
+});
+
+async function applyAvatar(url) {
+  await updateProfile(currentUser, { photoURL: url });
+  await setDoc(doc(db, 'users', currentUser.uid), { photoURL: url }, { merge: true });
+  document.getElementById('avatarCircle').innerHTML = `<img src="${url}" alt="avatar">`;
+  const navAv = document.getElementById('navAvatar');
+  navAv.innerHTML = `<img src="${url}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+}
+
+/* ── Save Profile ── */
+window.saveProfile = async function() {
+  if (!currentUser) { showMsg('error','❌ Not logged in. Please refresh.'); return; }
+
+  const btn  = document.getElementById('saveProfileBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving…';
+
+  const name   = document.getElementById('sDisplayName').value.trim();
+  const role   = document.getElementById('sRole').value;
+  const bio    = document.getElementById('sBio').value.trim();
+  const college    = document.getElementById('sCollege').value.trim();
+  const department = document.getElementById('sDepartment').value.trim();
+  const mobile     = document.getElementById('sMobile').value.trim();
+
+  if (!name) { showMsg('error','⚠️ Please enter a display name.'); btn.disabled=false; btn.innerHTML='Save Changes 💾'; return; }
+
+  try {
+    // Update Firebase Auth display name
+    await updateProfile(currentUser, { displayName: name });
+
+    // setDoc with merge:true — creates the doc if it doesn't exist, or updates it
+    await setDoc(doc(db, 'users', currentUser.uid), {
+      uid:        currentUser.uid,
+      email:      currentUser.email,
+      displayName: name,
+      role,
+      bio,
+      college,
+      department,
+      mobile,
+      updatedAt:  new Date().toISOString()
+    }, { merge: true });
+
+    showMsg('success', '✅ Profile saved successfully!');
+  } catch(e) {
+    console.error('Save profile error:', e);
+    showMsg('error', '❌ Failed to save: ' + (e.message || 'Unknown error'));
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Save Changes 💾';
+  }
+};
+
+function showMsg(type, text) {
+  const msg = document.getElementById('saveMsg');
+  msg.className = `save-msg ${type}`;
+  msg.textContent = text;
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 4000);
+}
+
+/* ── Sign Out ── */
+window.confirmSignOut = async function() {
+  if (confirm('Sign out of CampusLink?')) {
+    await signOut(auth);
+    window.location.href = 'login.html';
+  }
+};
+
+/* ── Theme ── */
+window.applyThemeSettings = function(name, el) {
+  document.documentElement.setAttribute('data-theme', name);
+  localStorage.setItem('cl_theme', name);
+  document.getElementById('themeName').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  document.querySelectorAll('.th-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+};
+window.openThemeInline  = () => document.getElementById('themeOverlay').classList.add('open');
+window.closeThemeInline = () => document.getElementById('themeOverlay').classList.remove('open');
+
+/* ── Base64 fallback helper ── */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = e => resolve(e.target.result);
+    r.onerror = e => reject(e);
+    r.readAsDataURL(file);
+  });
+}
+
+/* ── Toast ── */
+window.toast = function(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+};
+</script>
+</div><!-- /contentReady -->
+</body>
+</html>
