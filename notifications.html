@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Notifications — CampusLink</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<style>
+  html,body{overflow-x:hidden;width:100%}
+  body{padding-bottom:84px}
+  .notif-page{max-width:720px;margin:86px auto 0;padding:0 clamp(12px,3vw,24px);box-sizing:border-box;width:100%}
+  .np-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .np-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text)}
+  .np-mark-btn{padding:8px 16px;border-radius:10px;border:1.5px solid var(--border);
+    background:var(--card);color:var(--muted);font-family:'Syne',sans-serif;
+    font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+  .np-mark-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+  .notif-tabs{display:flex;gap:8px;margin-bottom:18px}
+  .ntab{padding:8px 18px;border-radius:30px;border:1.5px solid var(--border);
+    background:var(--card);font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;
+    color:var(--muted);cursor:pointer;transition:all .2s}
+  .ntab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .ntab:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+
+  .notif-list{display:flex;flex-direction:column;gap:10px}
+  .notif-card{
+    background:var(--card);border:1.5px solid var(--border);border-radius:16px;
+    padding:16px;display:flex;align-items:center;gap:14px;
+    transition:all .25s;cursor:default;position:relative;overflow:hidden}
+  .notif-card:hover{box-shadow:0 4px 20px var(--glow);transform:translateY(-1px)}
+  .notif-card.unread{border-color:var(--primary);background:linear-gradient(135deg,var(--card) 80%,var(--glow))}
+  .notif-card.unread::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:var(--grad);border-radius:16px 0 0 16px}
+
+  .notif-avi{width:46px;height:46px;border-radius:50%;flex-shrink:0;
+    background:var(--grad);display:flex;align-items:center;justify-content:center;
+    font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:#fff;
+    overflow:hidden;box-shadow:0 3px 10px var(--glow)}
+  .notif-avi img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+  .notif-icon-badge{
+    position:absolute;bottom:-2px;right:-2px;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--card);display:flex;align-items:center;justify-content:center;font-size:.75rem}
+
+  .notif-content{flex:1;min-width:0}
+  .notif-msg{font-size:.88rem;color:var(--text);line-height:1.4;font-weight:500}
+  .notif-msg strong{color:var(--primary);font-weight:700}
+  .notif-ts{font-size:.72rem;color:var(--muted);margin-top:4px;display:block}
+
+  .notif-unread-dot{
+    width:10px;height:10px;border-radius:50%;background:var(--primary);
+    flex-shrink:0;animation:pulse 2s infinite}
+
+  .empty-notif{text-align:center;padding:80px 20px}
+  .empty-notif .en-icon{font-size:3rem;margin-bottom:14px}
+  .empty-notif h3{font-family:'Syne',sans-serif;font-size:1.2rem;color:var(--text);margin-bottom:6px}
+  .empty-notif p{color:var(--muted);font-size:.9rem}
+
+  .loading-state{text-align:center;padding:40px;color:var(--muted);font-family:'Syne',sans-serif}
+
+  /* Mobile bottom nav */
+  .mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;
+    height:70px;background:var(--nav);
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    border-top:1.5px solid var(--border);
+    display:none;align-items:center;justify-content:space-around;padding:0 10px}
+  .m-nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:transparent;border:none;cursor:pointer;color:var(--muted);
+    text-decoration:none;flex:1;transition:all .2s;padding:8px}
+  .m-nav-item:hover,.m-nav-item.active{color:var(--primary)}
+  .m-nav-icon{font-size:1.3rem}
+  .m-nav-lbl{font-size:.65rem;font-weight:700;font-family:'Syne',sans-serif}
+  @media(max-width:768px){
+    body{padding-bottom:80px;overflow-x:hidden}
+    .mobile-nav{display:flex}
+    .notif-page{padding:0 12px;margin-top:76px}
+    .np-header{flex-wrap:wrap;gap:10px}
+    .np-title{font-size:1.2rem}
+    .notif-tabs{flex-wrap:wrap;gap:6px}
+    .ntab{padding:7px 12px;font-size:.78rem}
+    .notif-card{padding:12px;gap:10px}
+  }
+  @media(max-width:420px){
+    .notif-page{padding:0 10px}
+    .notif-tabs{gap:4px}
+    .ntab{padding:6px 10px;font-size:.74rem}
+  }
+</style>
+</head>
+<body class="loading">
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" role="status" aria-label="Loading Notifications">
+  <div class="spinner"></div>
+  <h2>CampusLink</h2>
+</div>
+
+<div id="contentReady" class="content-ready">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="nav-logo" href="index.html">🌿 CampusLink</a>
+  <div class="nav-right">
+    <button class="icon-btn" onclick="history.back()">← Back</button>
+    <button class="theme-btn" onclick="cycleTheme()">🎨 <span id="themeName">Emerald</span></button>
+    <div class="nav-avatar" id="navAvatar"></div>
+  </div>
+</nav>
+
+<!-- NOTIFICATIONS PAGE -->
+<div class="notif-page">
+  <div class="np-header">
+    <h1 class="np-title">🔔 Notifications</h1>
+    <button class="np-mark-btn" id="markAllBtn" onclick="markAllRead()">Mark all read</button>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="notif-tabs">
+    <button class="ntab active" id="tab-all"      onclick="filterTab('all',this)">All</button>
+    <button class="ntab"        id="tab-follow"   onclick="filterTab('follow',this)">👤 Follows</button>
+    <button class="ntab"        id="tab-comment"  onclick="filterTab('comment',this)">💬 Comments</button>
+    <button class="ntab"        id="tab-like"     onclick="filterTab('like',this)">❤️ Likes</button>
+    <button class="ntab"        id="tab-unread"   onclick="filterTab('unread',this)">🔴 Unread</button>
+  </div>
+
+  <!-- List -->
+  <div class="notif-list" id="notifList">
+    <div class="loading-state">⏳ Loading notifications…</div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <a href="index.html" class="m-nav-item"><span class="m-nav-icon">🏠</span><span class="m-nav-lbl">Home</span></a>
+  <button class="m-nav-item active"><span class="m-nav-icon">🔔</span><span class="m-nav-lbl">Notifs</span></button>
+  <a href="messages.html" class="m-nav-item"><span class="m-nav-icon">💬</span><span class="m-nav-lbl">Messages</span></a>
+  <a href="settings.html" class="m-nav-item"><span class="m-nav-icon">⚙️</span><span class="m-nav-lbl">Settings</span></a>
+</nav>
+
+<div id="toastEl" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import {
+  collection, doc, getDoc, setDoc, updateDoc, onSnapshot,
+  query, orderBy, limit, writeBatch, where
+} from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+let currentUser = null;
+let allNotifs   = [];
+let activeTab   = 'all';
+let toastTimer  = null;
+
+/* ── Theme ── */
+const savedTheme = localStorage.getItem('cl_theme') || 'emerald';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.getElementById('themeName').textContent = savedTheme.charAt(0).toUpperCase() + savedTheme.slice(1);
+
+/* ── Auth ── */
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  currentUser = user;
+
+  const initials = (user.displayName || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const navAv = document.getElementById('navAvatar');
+  if (user.photoURL) navAv.innerHTML = `<img src="${user.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  else navAv.textContent = initials;
+
+  listenNotifications();
+
+  // Hide loader
+  setTimeout(() => {
+    document.body.classList.remove('loading');
+    document.body.classList.add('loaded');
+  }, 200);
+});
+
+/* ── Real-time listener ── */
+function listenNotifications() {
+  const q = query(
+    collection(db, 'notifications', currentUser.uid, 'items'),
+    orderBy('createdAt', 'desc'),
+    limit(50)
+  );
+  onSnapshot(q, snap => {
+    allNotifs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderNotifs();
+  }, err => {
+    document.getElementById('notifList').innerHTML = `<div class="empty-notif"><div class="en-icon">⚠️</div><h3>Error loading notifications</h3><p>${err.message}</p></div>`;
+  });
+}
+
+/* ── Filter tab ── */
+window.filterTab = function(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll('.ntab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderNotifs();
+};
+
+/* ── Render ── */
+function renderNotifs() {
+  const list = document.getElementById('notifList');
+  let filtered = allNotifs;
+
+  if (activeTab === 'follow')  filtered = allNotifs.filter(n => n.type === 'follow');
+  if (activeTab === 'comment') filtered = allNotifs.filter(n => n.type === 'comment');
+  if (activeTab === 'like')    filtered = allNotifs.filter(n => n.type === 'like');
+  if (activeTab === 'unread')  filtered = allNotifs.filter(n => !n.read);
+
+  if (!filtered.length) {
+    const msgs = {
+      all:     'No notifications yet',
+      follow:  'No follow notifications',
+      comment: 'No comment notifications',
+      like:    'No like notifications',
+      unread:  'All caught up! 🎉'
+    };
+    list.innerHTML = `<div class="empty-notif">
+      <div class="en-icon">🔔</div>
+      <h3>${msgs[activeTab] || 'Nothing here'}</h3>
+      <p>Notifications will appear here when activity happens.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => buildCard(n)).join('');
+}
+
+function buildCard(n) {
+  const initials = (n.fromName || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const avatarEl = n.fromPhoto
+    ? `<img src="${n.fromPhoto}" alt="${initials}">`
+    : initials;
+
+  const iconMap = { follow:'👤', comment:'💬', like:'❤️', mention:'@' };
+  const icon = iconMap[n.type] || '🔔';
+  const ts   = timeAgo(n.createdAt);
+
+  return `<div class="notif-card ${n.read ? '' : 'unread'}" id="nc-${n.id}">
+    <div style="position:relative;flex-shrink:0">
+      <div class="notif-avi">${avatarEl}</div>
+      <div class="notif-icon-badge">${icon}</div>
+    </div>
+    <div class="notif-content">
+      <div class="notif-msg">${escHTML(n.message || '')}</div>
+      <span class="notif-ts">${ts}</span>
+    </div>
+    ${!n.read ? '<div class="notif-unread-dot"></div>' : ''}
+  </div>`;
+}
+
+/* ── Mark all read ── */
+window.markAllRead = async function() {
+  const unread = allNotifs.filter(n => !n.read);
+  if (!unread.length) { showToast('✅ All already read!'); return; }
+
+  const batch = writeBatch(db);
+  unread.forEach(n => {
+    batch.update(doc(db, 'notifications', currentUser.uid, 'items', n.id), { read: true });
+  });
+  await batch.commit();
+  showToast(`✅ ${unread.length} notification${unread.length>1?'s':''} marked as read`);
+};
+
+/* ── Auto-mark visible notifs read after 3s ── */
+setTimeout(async () => {
+  if (!currentUser) return;
+  const unread = allNotifs.filter(n => !n.read);
+  if (!unread.length) return;
+  const batch = writeBatch(db);
+  unread.forEach(n => {
+    batch.update(doc(db, 'notifications', currentUser.uid, 'items', n.id), { read: true });
+  });
+  try { await batch.commit(); } catch {}
+}, 3000);
+
+/* ── Helpers ── */
+function timeAgo(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const s = Math.floor((Date.now() - d) / 1000);
+  if (s < 60)    return 'Just now';
+  if (s < 3600)  return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  if (s < 604800)return `${Math.floor(s/86400)}d ago`;
+  return d.toLocaleDateString();
+}
+function escHTML(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function showToast(msg) {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+window.cycleTheme = function() {
+  const themes = ['emerald','ocean','violet','midnight','rose','solar'];
+  const cur = localStorage.getItem('cl_theme') || 'emerald';
+  const next = themes[(themes.indexOf(cur)+1) % themes.length];
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('cl_theme', next);
+  document.getElementById('themeName').textContent = next.charAt(0).toUpperCase()+next.slice(1);
+};
+</script>
+</div><!-- /contentReady -->
+</body>
+</html>
