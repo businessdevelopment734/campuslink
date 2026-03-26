@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CampusLink — Sign In</title>
+  <meta name="description" content="Sign in or create your CampusLink account to connect, build, and grow with your campus community."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── Theme Tokens ─────────────────────────────────────── */
+    [data-theme="emerald"]{--bg:#F0FDF4;--bg2:#DCFCE7;--card:#fff;--border:#BBF7D0;--primary:#22C55E;--primary2:#16A34A;--text:#111827;--text2:#374151;--muted:#6B7280;--glow:rgba(34,197,94,.18);--grad:linear-gradient(135deg,#22C55E,#10B981,#059669);--hero:linear-gradient(135deg,#16A34A,#059669,#0D9488)}
+    [data-theme="ocean"]{--bg:#EFF6FF;--bg2:#DBEAFE;--card:#fff;--border:#BFDBFE;--primary:#3B82F6;--primary2:#2563EB;--text:#0F172A;--text2:#1E3A5F;--muted:#64748B;--glow:rgba(59,130,246,.18);--grad:linear-gradient(135deg,#3B82F6,#06B6D4,#0891B2);--hero:linear-gradient(135deg,#1D4ED8,#0891B2,#0E7490)}
+    [data-theme="violet"]{--bg:#FAF5FF;--bg2:#EDE9FE;--card:#fff;--border:#DDD6FE;--primary:#8B5CF6;--primary2:#7C3AED;--text:#1E1B4B;--text2:#2D2060;--muted:#6B7280;--glow:rgba(139,92,246,.18);--grad:linear-gradient(135deg,#8B5CF6,#EC4899,#F43F5E);--hero:linear-gradient(135deg,#6D28D9,#DB2777,#9333EA)}
+    [data-theme="midnight"]{--bg:#0F172A;--bg2:#1E293B;--card:#1E293B;--border:#334155;--primary:#38BDF8;--primary2:#0EA5E9;--text:#F1F5F9;--text2:#CBD5E1;--muted:#94A3B8;--glow:rgba(56,189,248,.18);--grad:linear-gradient(135deg,#38BDF8,#818CF8,#C084FC);--hero:linear-gradient(135deg,#0369A1,#4338CA,#6D28D9)}
+    [data-theme="rose"]{--bg:#FFF1F2;--bg2:#FFE4E6;--card:#fff;--border:#FECDD3;--primary:#F43F5E;--primary2:#E11D48;--text:#1C0A10;--text2:#3B0A1A;--muted:#9F7182;--glow:rgba(244,63,94,.18);--grad:linear-gradient(135deg,#F43F5E,#FB923C,#FBBF24);--hero:linear-gradient(135deg,#BE123C,#EA580C,#D97706)}
+    [data-theme="solar"]{--bg:#FFFBEB;--bg2:#FEF3C7;--card:#fff;--border:#FDE68A;--primary:#F59E0B;--primary2:#D97706;--text:#1C1917;--text2:#292524;--muted:#78716C;--glow:rgba(245,158,11,.18);--grad:linear-gradient(135deg,#F59E0B,#EF4444,#EC4899);--hero:linear-gradient(135deg,#D97706,#DC2626,#B45309)}
+
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .35s,color .35s;padding:20px}
+
+    /* ── Background Orbs ──────────────────────────────────── */
+    .bg-orbs{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .orb{position:absolute;border-radius:50%;opacity:.18;filter:blur(60px);animation:float 8s ease-in-out infinite}
+    .orb1{width:400px;height:400px;background:var(--primary);top:-100px;left:-100px;animation-delay:0s}
+    .orb2{width:300px;height:300px;background:var(--primary2,#059669);bottom:-80px;right:-80px;animation-delay:3s}
+    .orb3{width:200px;height:200px;background:var(--primary);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:6s}
+    @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.06)}}
+
+    /* ── Auth Card ────────────────────────────────────────── */
+    .auth-card{position:relative;z-index:1;background:var(--card);border:1.5px solid var(--border);border-radius:24px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.12),0 0 0 1px var(--border);overflow:hidden;animation:cardIn .5s cubic-bezier(.4,0,.2,1)}
+    @keyframes cardIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+    .auth-header{background:var(--hero);padding:36px 32px 28px;text-align:center;position:relative;overflow:hidden}
+    .auth-header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.05'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E");animation:drift 15s linear infinite}
+    @keyframes drift{to{background-position:60px 60px}}
+    .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:#fff;letter-spacing:-.5px;margin-bottom:6px}
+    .auth-tagline{font-size:.85rem;opacity:.85;color:#fff;letter-spacing:.5px}
+
+    .auth-body{padding:28px 32px 32px}
+
+    /* ── Tabs ─────────────────────────────────────────────── */
+    .auth-tabs{display:flex;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px}
+    .auth-tab{flex:1;padding:10px;border:none;background:transparent;border-radius:9px;font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s}
+    .auth-tab.active{background:var(--card);color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+    /* ── Form ─────────────────────────────────────────────── */
+    .form-section{display:none}
+    .form-section.active{display:block}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:6px}
+    .form-input{width:100%;padding:11px 16px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:all .2s}
+    .form-input:focus{border-color:var(--primary);background:var(--card);box-shadow:0 0 0 3px var(--glow)}
+    .form-input::placeholder{color:var(--muted)}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    .btn-primary{width:100%;padding:13px;border:none;border-radius:12px;background:var(--grad);color:#fff;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:4px;box-shadow:0 4px 16px var(--glow)}
+    .btn-primary:hover{opacity:.9;transform:translateY(-2px);box-shadow:0 8px 24px var(--glow)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:.82rem}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    .btn-google{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s}
+    .btn-google:hover{border-color:var(--primary);background:var(--bg2);transform:translateY(-1px);box-shadow:0 4px 12px var(--glow)}
+    .google-icon{width:20px;height:20px}
+
+    /* ── Error / Success Messages ─────────────────────────── */
+    .msg{padding:12px 16px;border-radius:10px;font-size:.84rem;font-weight:600;margin-bottom:14px;display:none}
+    .msg.error{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+    .msg.success{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+    .msg.highlight {
+      background: #fef08a;
+      color: #854d0e;
+      border: 2px solid #facc15;
+      font-weight: 800;
+      text-align: center;
+      animation: msgPulse 1s infinite alternate;
+    }
+    @keyframes msgPulse {
+      from { transform: scale(1); box-shadow: 0 0 0 rgba(250, 204, 21, 0); }
+      to { transform: scale(1.02); box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+    }
+    .msg.show{display:block}
+
+    /* ── Spinner ──────────────────────────────────────────── */
+    .spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── Footer note ──────────────────────────────────────── */
+    .auth-footer{text-align:center;font-size:.75rem;color:var(--muted);margin-top:18px;line-height:1.6}
+    .auth-footer a{color:var(--primary);text-decoration:none;font-weight:600}
+
+    /* ── Forgot Password Link ──────────────────────────────── */
+    .forgot-link {
+      display: block;
+      margin-top: -8px;
+      margin-bottom: 20px;
+      text-align: right;
+      font-size: .8rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .forgot-link:hover { color: var(--primary); }
+
+    .back-to-login {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: .85rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color .2s;
+    }
+    .back-to-login:hover { color: var(--primary); }
+
+    /* ── Reset Success Modal ───────────────────────────────── */
+    .reset-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .reset-overlay.show { display: flex; animation: fadeIn .3s; }
+    
+    .reset-modal {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 16px;
+      width: 90%;          /* Dynamic width */
+      max-width: 350px;    /* Even smaller and more focused for Laptops */
+      border: 1.5px solid var(--border);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      animation: modalScale .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    /* Responsive adjustments for even smaller screens (mobile) */
+    @media (max-width: 480px) {
+      .reset-modal {
+        padding: 12px;
+        max-width: 95%;
+      }
+      .reset-modal-btn {
+        padding: 8px 16px;
+        font-size: .8rem;
+      }
+    }
+    @keyframes modalScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    
+    .reset-modal-video {
+      width: 100%;
+      border-radius: 16px;
+      display: block;
+      background: #000;
+    }
+    .reset-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding-bottom: 8px;
+    }
+    .reset-modal-btn {
+      padding: 10px 20px;
+      border-radius: 30px;
+      border: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-close-final { background: var(--grad); color: #fff; }
+    .btn-replay { background: var(--bg2); color: var(--text); border: 1.5px solid var(--border); }
+    .reset-modal-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+    .reset-modal-btn:active { transform: scale(0.95); }
+
+    .forgot-form-content { transition: opacity 0.3s; }
+    .forgot-form-content.hidden { opacity: 0; pointer-events: none; }
+
+    /* ── Mobile Responsive ─────────────────────────────────── */
+    @media(max-width:480px) {
+      body { padding: 12px; align-items: flex-start; padding-top: 20px; }
+      .auth-card { border-radius: 18px; }
+      .auth-header { padding: 24px 20px 20px; }
+      .logo { font-size: 1.45rem; }
+      .auth-tagline { font-size: .78rem; }
+      .auth-body { padding: 20px 16px 24px; }
+      .auth-tab { font-size: .78rem; padding: 9px 6px; white-space: nowrap; }
+      .form-input { font-size: .88rem; padding: 10px 12px; }
+      .btn-primary { padding: 12px; font-size: .88rem; }
+      .btn-google { padding: 10px; font-size: .82rem; }
+      /* Stack first/last name fields vertically on mobile */
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
+  <!-- Auth Card -->
+  <div class="auth-card" role="main">
+    <div class="auth-header">
+      <div class="logo">🌿 CampusLink</div>
+      <div class="auth-tagline">Connect · Build · Grow</div>
+    </div>
+    <div class="auth-body">
+      <!-- Tab Switcher -->
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')" role="tab" aria-selected="true">Sign In</button>
+        <button class="auth-tab" id="tab-signup"  onclick="switchAuthTab('signup')"  role="tab" aria-selected="false">Create Account</button>
+      </div>
+
+      <!-- Error/Success Banner -->
+      <div class="msg" id="authMsg" role="alert"></div>
+
+      <!-- ── Sign In Form ── -->
+      <div class="form-section active" id="signinSection">
+        <div class="form-group">
+          <label for="siEmail">Email Address</label>
+          <input type="email" id="siEmail" class="form-input" placeholder="you@university.edu" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label for="siPass">Password</label>
+          <input type="password" id="siPass" class="form-input" placeholder="Enter your password" autocomplete="current-password"/>
+        </div>
+        <a href="javascript:void(0)" class="forgot-link" onclick="switchAuthTab('forgot')">Forgot Password?</a>
+        <button class="btn-primary" id="signInBtn" onclick="handleSignIn()">Sign In 🚀</button>
+        <div class="divider">or continue with</div>
+        <button class="btn-google" onclick="handleGoogleAuth()">
+          <svg class="google-icon" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <!-- ── Forgot Password Form ── -->
+      <div class="form-section" id="forgotSection">
+        <div id="forgotContent" class="forgot-form-content">
+          <p style="font-size: .88rem; color: var(--muted); margin-bottom: 20px; text-align: center;">Enter your email to receive a password reset link.</p>
+          <div class="form-group">
+            <label for="fpEmail">Email Address</label>
+            <input type="email" id="fpEmail" class="form-input" placeholder="you@university.edu" autocomplete="email"/>
+          </div>
+          <button class="btn-primary" id="forgotBtn" onclick="handleForgotPassword()">Reset Password 📧</button>
+          <a href="javascript:void(0)" class="back-to-login" onclick="switchAuthTab('signin')">Back to Sign In</a>
+        </div>
+      </div>
+
+      <!-- ── Sign Up Form ── -->
+      <div class="form-section" id="signupSection">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="suFirst">First Name</label>
+            <input type="text" id="suFirst" class="form-input" placeholder="Arjun" autocomplete="given-name"/>
+          </div>
+          <div class="form-group">
+            <label for="suLast">Last Name</label>
+            <input type="text" id="suLast" class="form-input" placeholder="Joshi" autocomplete="family-name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="suEmail">University Email</label>
+          <input type="email" id="suEmail" class="form-input" placeholder="you@university.edu" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label for="suRole">Your Role</label>
+          <select id="suRole" class="form-input">
+            <option value="">Select your role...</option>
+            <option value="Student">Student</option>
+            <option value="Faculty">Faculty</option>
+            <option value="Researcher">Researcher</option>
+            <option value="Alumni">Alumni</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="suPass">Password</label>
+          <input type="password" id="suPass" class="form-input" placeholder="Min 8 characters" autocomplete="new-password"/>
+        </div>
+        <div class="form-group">
+          <label for="suPass2">Confirm Password</label>
+          <input type="password" id="suPass2" class="form-input" placeholder="Repeat password" autocomplete="new-password"/>
+        </div>
+        <button class="btn-primary" id="signUpBtn" onclick="handleSignUp()">Create Account 🎓</button>
+        <div class="divider">or continue with</div>
+        <button class="btn-google" onclick="handleGoogleAuth()">
+          <svg class="google-icon" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+          Sign up with Google
+        </button>
+      </div>
+
+      <p class="auth-footer">By continuing you agree to CampusLink's <a href="terms.html">Terms</a> &amp; <a href="privacy.html">Privacy Policy</a></p>
+    </div>
+  </div>
+  
+  <!-- Reset Success Modal -->
+  <div class="reset-overlay" id="resetOverlay">
+    <div class="reset-modal">
+      <video class="reset-modal-video" id="resetModalVid" playsinline>
+        <source src="reset.mp4" type="video/mp4">
+      </video>
+      <div class="reset-controls">
+        <button class="reset-modal-btn btn-replay" onclick="replayResetVid()">↺ Replay</button>
+        <button class="reset-modal-btn btn-close-final" onclick="closeResetModal()">Close & Sign In ➜</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Auth SDK -->
+  <script type="module">
+    import { auth, db, googleProvider } from './firebase-config.js';
+    import {
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      sendPasswordResetEmail,
+      signInWithPopup,
+      updateProfile,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import {
+      doc, setDoc, getDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    /* ── Redirect if already logged in ── */
+    onAuthStateChanged(auth, user => {
+      // Only redirect automatically if NOT just created an account
+      if (user && !window._isSigningUp) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    /* ── Helpers ── */
+    function showMsg(text, type='error') {
+      const el = document.getElementById('authMsg');
+      el.textContent = text;
+      el.className = `msg ${type} show`;
+    }
+    function hideMsg() {
+      document.getElementById('authMsg').className = 'msg';
+    }
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      if (loading) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> Please wait…`;
+      } else {
+        btn.disabled = false;
+        if (btnId === 'signInBtn') btn.innerHTML = 'Sign In 🚀';
+        else if (btnId === 'signUpBtn') btn.innerHTML = 'Create Account 🎓';
+        else if (btnId === 'forgotBtn') btn.innerHTML = 'Reset Password 📧';
+      }
+    }
+
+    /* ── Create / update user Firestore profile ── */
+    async function ensureUserProfile(user, extra = {}) {
+      const ref = doc(db, 'users', user.uid);
+      const snap = await getDoc(ref);
+      
+      const defaultData = {
+        uid:          user.uid,
+        displayName:  user.displayName || extra.displayName || 'CampusLink User',
+        email:        user.email || '',
+        photoURL:     user.photoURL || '',
+        role:         extra.role || 'Student',
+        bio:          '',
+        credits:      0,
+        level:        1,
+        followers:    0,
+        following:    0,
+        posts:        0,
+        createdAt:    serverTimestamp()
+      };
+
+      if (!snap.exists()) {
+        await setDoc(ref, defaultData);
+      } else {
+        // If profile exists but is missing key info, update it
+        const currentData = snap.data();
+        const updates = {};
+        if (!currentData.displayName || currentData.displayName === 'User' || currentData.displayName === 'CampusLink User') {
+          if (user.displayName || extra.displayName) updates.displayName = user.displayName || extra.displayName;
+        }
+        if (!currentData.email && user.email) updates.email = user.email;
+        if (!currentData.uid) updates.uid = user.uid;
+        
+        if (Object.keys(updates).length > 0) {
+          await setDoc(ref, updates, { merge: true });
+        }
+      }
+    }
+
+    /* ── Sign In ── */
+    window.handleSignIn = async function() {
+      hideMsg();
+      const email = document.getElementById('siEmail').value.trim();
+      const pass  = document.getElementById('siPass').value;
+      if (!email || !pass) { showMsg('Please fill in all fields.'); return; }
+      setLoading('signInBtn', true);
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        await ensureUserProfile(cred.user);
+        window.location.href = 'index.html';
+      } catch(e) {
+        showMsg(friendlyError(e.code));
+        setLoading('signInBtn', false);
+      }
+    };
+
+    /* ── Forgot Password Logic ── */
+    window.handleForgotPassword = async function() {
+      hideMsg();
+      const email = document.getElementById('fpEmail').value.trim();
+      if (!email) { showMsg('Please enter your email address.'); return; }
+      
+      const overlay = document.getElementById('resetOverlay');
+      const vid     = document.getElementById('resetModalVid');
+
+      setLoading('forgotBtn', true);
+      try {
+        await sendPasswordResetEmail(auth, email);
+        
+        // --- OPEN MODAL ---
+        overlay.classList.add('show');
+        vid.muted = false;
+        vid.currentTime = 0;
+        await vid.play();
+        
+      } catch(e) {
+        showMsg(friendlyError(e.code));
+      } finally {
+        setLoading('forgotBtn', false);
+      }
+    };
+
+    window.replayResetVid = () => {
+      const vid = document.getElementById('resetModalVid');
+      vid.currentTime = 0;
+      vid.play();
+    };
+
+    window.closeResetModal = () => {
+      const overlay = document.getElementById('resetOverlay');
+      const vid     = document.getElementById('resetModalVid');
+      overlay.classList.remove('show');
+      vid.pause();
+      
+      // Redirect to signup as requested
+      switchAuthTab('signup');
+      showMsg('📩 Reset link sent! Please check your inbox.', 'success');
+    };
+
+    /* ── Sign Up ── */
+    window.handleSignUp = async function() {
+      hideMsg();
+      const first = document.getElementById('suFirst').value.trim();
+      const last  = document.getElementById('suLast').value.trim();
+      const email = document.getElementById('suEmail').value.trim();
+      const role  = document.getElementById('suRole').value;
+      const pass  = document.getElementById('suPass').value;
+      const pass2 = document.getElementById('suPass2').value;
+      if (!first || !last || !email || !role || !pass) { showMsg('Please fill in all fields.'); return; }
+      if (pass.length < 8) { showMsg('Password must be at least 8 characters.'); return; }
+      if (pass !== pass2)  { showMsg('Passwords do not match.'); return; }
+      
+      setLoading('signUpBtn', true);
+      window._isSigningUp = true; // Temporary flag to prevent auto-redirect
+      
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        const displayName = `${first} ${last}`;
+        await updateProfile(cred.user, { displayName });
+        await ensureUserProfile(cred.user, { displayName, role });
+        
+        // --- NEW BEHAVIOR: Sign out and require login ---
+        await signOut(auth);
+        window._isSigningUp = false;
+        
+        showMsg('🎉 Account created! Please sign in now.', 'success');
+        switchAuthTab('signin');
+        setLoading('signUpBtn', false);
+        
+        // Optional: pre-fill email
+        document.getElementById('siEmail').value = email;
+        document.getElementById('siPass').value = '';
+        
+      } catch(e) {
+        window._isSigningUp = false;
+        showMsg(friendlyError(e.code));
+        setLoading('signUpBtn', false);
+      }
+    };
+
+    /* ── Google Auth ── */
+    window.handleGoogleAuth = async function() {
+      hideMsg();
+      // Temporary highlighted coming soon message
+      showMsg('🚀 Google Sign-In is coming soon! Please use your email/password for now.', 'highlight');
+      
+      /* 
+      try {
+        const cred = await signInWithPopup(auth, googleProvider);
+        await ensureUserProfile(cred.user);
+        window.location.href = 'index.html';
+      } catch(e) {
+        if (e.code !== 'auth/popup-closed-by-user') showMsg(friendlyError(e.code));
+      }
+      */
+    };
+
+    /* ── Friendly error messages ── */
+    function friendlyError(code) {
+      const map = {
+        'auth/user-not-found':      '❌ No account found with this email.',
+        'auth/wrong-password':      '❌ Incorrect password. Please try again.',
+        'auth/email-already-in-use':'⚠️ An account with this email already exists.',
+        'auth/invalid-email':       '⚠️ Please enter a valid email address.',
+        'auth/weak-password':       '⚠️ Password is too weak.',
+        'auth/too-many-requests':   '🔒 Too many attempts. Please try again later.',
+        'auth/network-request-failed':'🌐 Network error. Check your connection.'
+      };
+      return map[code] || `Something went wrong (${code}).`;
+    }
+  </script>
+
+  <script>
+    /* ── Tab switch (no module needed) ── */
+    function switchAuthTab(tab) {
+      document.getElementById('signinSection').classList.toggle('active', tab === 'signin');
+      document.getElementById('signupSection').classList.toggle('active', tab === 'signup');
+      document.getElementById('forgotSection').classList.toggle('active', tab === 'forgot');
+      
+      document.getElementById('tab-signin').classList.toggle('active', tab === 'signin' || tab === 'forgot');
+      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+      
+      document.getElementById('tab-signin').setAttribute('aria-selected', tab === 'signin' || tab === 'forgot');
+      document.getElementById('tab-signup').setAttribute('aria-selected', tab === 'signup');
+      
+      // Update tab text if in forgot mode or back to signin
+      document.getElementById('tab-signin').textContent = (tab === 'forgot') ? 'Reset Password' : 'Sign In';
+
+      // Stop video if switching away
+      const vid = document.getElementById('resetModalVid');
+      if (vid) { vid.pause(); }
+      
+      document.getElementById('authMsg').className = 'msg';
+    }
+
+    /* ── Restore saved theme ── */
+    const t = localStorage.getItem('cl_theme') || 'emerald';
+    document.documentElement.setAttribute('data-theme', t);
+
+    /* ── Enter key support ── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const active = document.querySelector('.form-section.active').id;
+        if (active === 'signinSection') window.handleSignIn?.();
+        else if (active === 'signupSection') window.handleSignUp?.();
+        else if (active === 'forgotSection') window.handleForgotPassword?.();
+      }
+    });
+  </script>
+</body>
+</html>
