@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://campuslink-jade.vercel.app/sitemap.xml
